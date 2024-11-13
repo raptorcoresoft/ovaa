@@ -45,7 +45,11 @@ public class TheftOverwriteProvider extends ContentProvider {
 
     @Override
     public ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode) throws FileNotFoundException {
-        File file = new File(Environment.getExternalStorageDirectory(), uri.getLastPathSegment());
+        File baseDir = Environment.getExternalStorageDirectory();
+        File file = new File(baseDir, uri.getLastPathSegment()).getCanonicalFile();
+        if (!file.getPath().startsWith(baseDir.getPath())) {
+            throw new FileNotFoundException("Invalid file path: " + file.getPath());
+        }
         return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_WRITE);
     }
 }
